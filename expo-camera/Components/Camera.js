@@ -125,18 +125,17 @@ class CameraComponent extends Component {
                             name="message-reply"
                             style={{ color: 'white', fontSize: 36 }}
                         ></MaterialCommunityIcons>
-
                         <View style={{ alignItems: 'center' }}>
                             <MaterialCommunityIcons
                                 name="circle-outline"
                                 style={{ color: 'white', fontSize: 100 }}
-                                onPress={() =>{this.takePicture()}}
-                                    // this.state.rollGranted && this.state.cameraGranted
-                                    //     ? this.takePicture : Alert.alert('Permissions not granted')}
+                                onPress={() => {
+                                    this.state.rollGranted && this.state.cameraGranted
+                                        ? this.takePicture() : Alert.alert('Permissions not granted')
+                                }}
                             > </MaterialCommunityIcons>
                             <Icon name='ios-images' style={{ color: 'white', fontSize: 36 }}></Icon>
                         </View>
-
                         <MaterialCommunityIcons
                             name="google-circles-communities"
                             style={{ color: 'white', fontSize: 36 }}
