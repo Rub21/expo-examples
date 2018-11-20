@@ -1,29 +1,70 @@
 //import liraries
 import React, { Component } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 
-import { Camera, Permissions } from 'expo';
+import { Camera, Permissions, MediaLibrary, Constants } from 'expo';
 import { Container, Content, Header, Item, Icon, Input, Button } from 'native-base';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // create a component
 class CameraComponent extends Component {
     state = {
-        hasCameraPermission: null,
+        cameraGranted: null,
+        rollGranted: false,
         type: Camera.Constants.Type.back
     }
 
     async componentWillMount() {
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
-        this.setState({ hasCameraPermission: status === 'granted' });
+        this.setState({ cameraGranted: status === 'granted' });
     }
+
+    componentDidMount() {
+        this.getCameraPermissions();
+    }
+
+    async getCameraPermissions() {
+        const { Permissions } = Expo;
+        const { status } = await Permissions.askAsync(Permissions.CAMERA);
+        if (status === 'granted') {
+            this.setState({ cameraGranted: true });
+        } else {
+            this.setState({ cameraGranted: false });
+            console.log('Uh oh! The user has not granted us permission.');
+        }
+        this.getCameraRollPermissions();
+    }
+
+    async getCameraRollPermissions() {
+        const { Permissions } = Expo;
+        const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+        if (status === 'granted') {
+            this.setState({ rollGranted: true });
+        } else {
+            console.log('Uh oh! The user has not granted us permission.');
+            this.setState({ rollGranted: false });
+        }
+    }
+
+    takePicture = async () => {
+        const { uri } = await this.camera.takePictureAsync();
+        const asset = await MediaLibrary.createAssetAsync(uri);
+        MediaLibrary.createAlbumAsync('Expo', asset)
+            .then(() => {
+                console.log('Album created!');
+            })
+            .catch(error => {
+                console.log('err', error);
+            });
+    }
+
     render() {
-        const { hasCameraPermission } = this.state;
-        if (hasCameraPermission === null) {
+        const { cameraGranted } = this.state;
+        if (cameraGranted === null) {
             return (
                 <View />
             );
-        } else if (hasCameraPermission === false) {
+        } else if (cameraGranted === false) {
             return (
                 <View style={styles.container}>
                     <Text>No access to camara</Text>
@@ -31,7 +72,13 @@ class CameraComponent extends Component {
             );
         } else {
             return (<View style={{ flex: 1 }}>
-                <Camera style={{ flex: 1, justifyContent: 'space-between' }} type={this.state.type}>
+                <Camera
+                    ref={ref => {
+                        this.camera = ref;
+                    }}
+                    style={{ flex: 1, justifyContent: 'space-between' }}
+                    type={this.state.type}
+                >
                     <Header searchBar rounded style={{
                         position: "absolute",
                         backgroundColor: "transparent",
@@ -83,6 +130,9 @@ class CameraComponent extends Component {
                             <MaterialCommunityIcons
                                 name="circle-outline"
                                 style={{ color: 'white', fontSize: 100 }}
+                                onPress={() =>{this.takePicture()}}
+                                    // this.state.rollGranted && this.state.cameraGranted
+                                    //     ? this.takePicture : Alert.alert('Permissions not granted')}
                             > </MaterialCommunityIcons>
                             <Icon name='ios-images' style={{ color: 'white', fontSize: 36 }}></Icon>
                         </View>
