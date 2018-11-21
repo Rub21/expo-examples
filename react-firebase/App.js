@@ -1,12 +1,8 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-
 import firebase from './initializers/firebase';
-
+import * as config from './config';
 import { Container, Content, Header, Form, Input, Item, Button, Label } from 'native-base';
-
-
-
 
 export default class App extends React.Component {
 
@@ -20,7 +16,7 @@ export default class App extends React.Component {
   componentDidMount() {
     firebase.auth().onAuthStateChanged((user) => {
       if (user !== null) {
-        console.log(user);
+        // console.log(user);
       }
     });
   }
@@ -32,7 +28,6 @@ export default class App extends React.Component {
         alert("Plase enter atleast 6 characters");
         return;
       }
-
       firebase.auth().createUserWithEmailAndPassword(email, password);
     } catch (error) {
       console.log(error.toString());
@@ -42,7 +37,7 @@ export default class App extends React.Component {
     try {
       firebase.auth().signInWithEmailAndPassword(email, password)
         .then(function (user) {
-          console.log(user)
+          // console.log(user)
         })
     } catch (error) {
       console.log(error.toString());
@@ -50,11 +45,10 @@ export default class App extends React.Component {
   }
 
   async loginWithFacebook() {
-
     console.log('------------------------------------');
     console.log('login with facebook');
     console.log('------------------------------------');
-    const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync('681094422285808', { permissions: ['public_profile'] });
+    const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync(config.facebookAppId, { permissions: ['public_profile'] });
     if (type == 'success') {
       const credential = firebase.auth.FacebookAuthProvider.credential(token);
       firebase.auth().signInAndRetrieveDataWithCredential(credential).catch((error) => {
@@ -62,6 +56,28 @@ export default class App extends React.Component {
       })
     }
   }
+
+  async  signInWithGoogleAsync() {
+    console.log('------------------------------------');
+    console.log('Need to improve here');
+    console.log('------------------------------------');
+    try {
+      const result = await Expo.Google.logInAsync({
+        androidClientId: config.androidClientId,
+        iosClientId: config.iosClientId,
+        scopes: ['profile', 'email'],
+      });
+
+      if (result.type === 'success') {
+        return result.accessToken;
+      } else {
+        return { cancelled: true };
+      }
+    } catch (e) {
+      return { error: true };
+    }
+  }
+
 
   render() {
     return (
@@ -119,12 +135,20 @@ export default class App extends React.Component {
             <Text style={{ color: 'white' }}> Login with Facebook</Text>
           </Button>
 
+          <Button style={{ marginTop: 10 }}
+            full
+            rounded
+            primary
+            onPress={() => this.signInWithGoogleAsync()}
+          >
+            <Text style={{ color: 'white' }}> Login with Google</Text>
+          </Button>
+
         </Form>
       </Container>
     );
   }
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

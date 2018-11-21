@@ -5,7 +5,10 @@
     "slug": "react-firebase",
     "privacy": "public",
     "sdkVersion": "31.0.0",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -21,7 +24,12 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "config": {
+        "googleSignIn": {
+          "reservedClientId":"com.googleusercontent.apps.40094751191-2nopc65s698q62ok4j5gvvm06o9oaqhh"
+        }
+      }
     }
   }
 }
